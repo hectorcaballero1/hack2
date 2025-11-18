@@ -268,7 +268,6 @@ Tu README debe incluir:
 - Este proyecto es exclusivamente para plataforma web
 - Deberán usar **React** con **TypeScript** obligatoriamente
 - **Tailwind CSS** es requerido para los estilos
-- No se permite el uso de librerías de componentes completas (Material-UI, Ant Design, etc.) - deben construir sus propios componentes
 - La API está preconfigurada y lista para usar como "caja negra"
 - El tiempo máximo es de **2 horas**
 - Trabajarán en equipos de **4-5 estudiantes**
