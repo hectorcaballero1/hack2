@@ -13,6 +13,7 @@ const Register = () => {
   const [formData, setFormData] = useState<RegisterRequest>({
     email: "",
     password: "",
+    name: "",
   });
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -52,6 +53,10 @@ const Register = () => {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-1">
+              <Label htmlFor="name">Nombre</Label>
+              <Input id="name" name="name" type="text" value={formData.name} onChange={handleChange} required placeholder="Juan Pérez" />
+            </div>
             <div className="space-y-1">
               <Label htmlFor="email">Email</Label>
               <Input id="email" name="email" type="email" value={formData.email} onChange={handleChange} required placeholder="tu@email.com" />
