@@ -1,80 +1,132 @@
-import React from "react";
-import { Task } from "../../types";
-import { Card } from "../common/Card";
+import type { Task, TaskPriority, TaskStatus } from '@/types';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Calendar, Trash2, Edit, User } from 'lucide-react';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 interface TaskCardProps {
   task: Task;
-  onStatusChange: (taskId: string, newStatus: string) => void;
+  onEdit?: (task: Task) => void;
+  onDelete?: (taskId: string) => void;
+  onStatusChange?: (taskId: string, status: TaskStatus) => void;
+  onClick?: (task: Task) => void;
 }
 
-export const TaskCard: React.FC<TaskCardProps> = ({ task, onStatusChange }) => {
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "URGENT":
-        return "bg-red-100 text-red-800";
-      case "HIGH":
-        return "bg-orange-100 text-orange-800";
-      case "MEDIUM":
-        return "bg-yellow-100 text-yellow-800";
-      case "LOW":
-        return "bg-green-100 text-green-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
+const priorityColors: Record<TaskPriority, string> = {
+  LOW: 'bg-blue-100 text-blue-800 hover:bg-blue-200',
+  MEDIUM: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200',
+  HIGH: 'bg-orange-100 text-orange-800 hover:bg-orange-200',
+  URGENT: 'bg-red-100 text-red-800 hover:bg-red-200',
+};
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "COMPLETED":
-        return "bg-green-100 text-green-800";
-      case "IN_PROGRESS":
-        return "bg-blue-100 text-blue-800";
-      case "TODO":
-        return "bg-gray-100 text-gray-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
+const statusColors: Record<TaskStatus, string> = {
+  TODO: 'bg-gray-100 text-gray-800 hover:bg-gray-200',
+  IN_PROGRESS: 'bg-indigo-100 text-indigo-800 hover:bg-indigo-200',
+  COMPLETED: 'bg-green-100 text-green-800 hover:bg-green-200',
+};
+
+const statusLabels: Record<TaskStatus, string> = {
+  TODO: 'Por Hacer',
+  IN_PROGRESS: 'En Progreso',
+  COMPLETED: 'Completada',
+};
+
+const priorityLabels: Record<TaskPriority, string> = {
+  LOW: 'Baja',
+  MEDIUM: 'Media',
+  HIGH: 'Alta',
+  URGENT: 'Urgente',
+};
+
+export const TaskCard = ({ task, onEdit, onDelete, onStatusChange, onClick }: TaskCardProps) => {
+  const isOverdue = new Date(task.dueDate) < new Date() && task.status !== 'COMPLETED';
+
+  const handleStatusClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const statusOrder: TaskStatus[] = ['TODO', 'IN_PROGRESS', 'COMPLETED'];
+    const currentIndex = statusOrder.indexOf(task.status);
+    const nextStatus = statusOrder[(currentIndex + 1) % statusOrder.length];
+    onStatusChange?.(task.id, nextStatus);
   };
 
   return (
-    <Card className="p-4 hover:shadow-lg transition-shadow">
-      <div className="flex justify-between items-start mb-3">
-        <h3 className="text-lg font-semibold">{task.title}</h3>
-        <div className="flex space-x-2">
-          <span
-            className={`px-2 py-1 rounded text-xs ${getPriorityColor(
-              task.priority
-            )}`}
-          >
-            {task.priority}
-          </span>
-          <span
-            className={`px-2 py-1 rounded text-xs ${getStatusColor(
-              task.status
-            )}`}
-          >
-            {task.status}
-          </span>
+    <Card
+      className={`hover:shadow-md transition-shadow cursor-pointer ${
+        isOverdue ? 'border-red-300' : ''
+      }`}
+      onClick={() => onClick?.(task)}
+    >
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between">
+          <CardTitle className="text-lg font-semibold">{task.title}</CardTitle>
+          <div className="flex gap-2">
+            {onEdit && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(task);
+                }}
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
+            )}
+            {onDelete && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(task.id);
+                }}
+              >
+                <Trash2 className="h-4 w-4 text-red-500" />
+              </Button>
+            )}
+          </div>
         </div>
-      </div>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{task.description}</p>
 
-      <p className="text-gray-600 mb-4">{task.description}</p>
-
-      <div className="flex justify-between items-center">
-        <div className="text-sm text-gray-500">
-          Vence: {new Date(task.dueDate).toLocaleDateString()}
+        <div className="flex flex-wrap gap-2 mb-4">
+          <Badge
+            className={`${statusColors[task.status]} cursor-pointer`}
+            onClick={handleStatusClick}
+          >
+            {statusLabels[task.status]}
+          </Badge>
+          <Badge className={priorityColors[task.priority]}>{priorityLabels[task.priority]}</Badge>
+          {isOverdue && (
+            <Badge variant="destructive" className="animate-pulse">
+              Vencida
+            </Badge>
+          )}
         </div>
 
-        <select
-          className="text-sm border rounded px-2 py-1"
-          value={task.status}
-          onChange={(e) => onStatusChange(task.id, e.target.value)}
-        >
-          <option value="TODO">Por hacer</option>
-          <option value="IN_PROGRESS">En progreso</option>
-          <option value="COMPLETED">Completada</option>
-        </select>
-      </div>
+        <div className="flex flex-col gap-2 text-sm text-muted-foreground">
+          {task.assignee && (
+            <div className="flex items-center gap-2">
+              <User className="h-4 w-4" />
+              <span>{task.assignee.name}</span>
+            </div>
+          )}
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4" />
+            <span className={isOverdue ? 'text-red-500 font-semibold' : ''}>
+              {format(new Date(task.dueDate), "d 'de' MMMM, yyyy", { locale: es })}
+            </span>
+          </div>
+          {task.project && (
+            <div className="text-xs bg-gray-100 rounded px-2 py-1 inline-block w-fit">
+              {task.project.name}
+            </div>
+          )}
+        </div>
+      </CardContent>
     </Card>
   );
 };
