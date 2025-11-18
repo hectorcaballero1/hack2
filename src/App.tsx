@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { Toaster } from '@/components/ui/sonner';
 import PrivateRoute from './components/PrivateRoute';
+import Navbar from './components/Navbar';
 
 // Páginas públicas
 import Login from './pages/Login';
@@ -20,9 +21,9 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <Navbar />
+        <Toaster />
         <Routes>
-          <Toaster />
-
           {/* Públicas */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -71,8 +72,8 @@ function App() {
           } />
 
           {/* Redirects */}
-          <Route path="/" element={<Navigate to="/dashboard" />} />
-          <Route path="*" element={<Navigate to="/dashboard" />} />
+          <Route path="/" element={<Navigate to="/login" />} />
+          <Route path="*" element={<Navigate to="/login" />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>
