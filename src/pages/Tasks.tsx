@@ -129,6 +129,7 @@ const Tasks = () => {
       loadTasks();
     } catch (error: any) {
       console.error('Error saving task:', error);
+      console.error('Error details:', error.response?.data);
       toast.error(error.response?.data?.message || 'Error al guardar la tarea');
     } finally {
       setIsSubmitting(false);

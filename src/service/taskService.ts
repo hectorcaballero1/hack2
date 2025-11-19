@@ -8,6 +8,20 @@ import type {
   TaskFilters,
 } from '../types';
 
+// Transformar tarea de snake_case a camelCase
+const transformTask = (task: any): Task => ({
+  id: String(task.id),
+  title: task.title,
+  description: task.description,
+  status: task.status,
+  priority: task.priority,
+  dueDate: task.due_date,
+  projectId: String(task.project_id),
+  assignedTo: task.assigned_to ? String(task.assigned_to) : undefined,
+  createdAt: task.created_at,
+  updatedAt: task.updated_at,
+});
+
 /**
  * Listar todas las tareas con filtros opcionales
  * @param filters - Filtros: projectId, status, priority, assignedTo, page, limit
@@ -22,8 +36,11 @@ export const getTasks = async (filters?: TaskFilters): Promise<TasksResponse> =>
   if (filters?.page) params.append('page', filters.page.toString());
   if (filters?.limit) params.append('limit', filters.limit.toString());
 
-  const response = await api.get<TasksResponse>(`/tasks?${params.toString()}`);
-  return response.data;
+  const response = await api.get(`/tasks?${params.toString()}`);
+  return {
+    tasks: response.data.tasks.map(transformTask),
+    totalPages: response.data.totalPages || 1,
+  };
 };
 
 /**
@@ -31,8 +48,8 @@ export const getTasks = async (filters?: TaskFilters): Promise<TasksResponse> =>
  * @param id - ID de la tarea
  */
 export const getTaskById = async (id: string): Promise<Task> => {
-  const response = await api.get<Task>(`/tasks/${id}`);
-  return response.data;
+  const response = await api.get(`/tasks/${id}`);
+  return transformTask(response.data);
 };
 
 /**
@@ -40,8 +57,17 @@ export const getTaskById = async (id: string): Promise<Task> => {
  * @param data - Datos de la tarea a crear
  */
 export const createTask = async (data: CreateTaskRequest): Promise<Task> => {
-  const response = await api.post<Task>('/tasks', data);
-  return response.data;
+  // Transformar a snake_case para la API
+  const apiData = {
+    title: data.title,
+    description: data.description,
+    project_id: parseInt(data.projectId),
+    priority: data.priority,
+    due_date: data.dueDate,
+    assigned_to: data.assignedTo ? parseInt(data.assignedTo) : undefined
+  };
+  const response = await api.post('/tasks', apiData);
+  return transformTask(response.data);
 };
 
 /**
@@ -50,8 +76,17 @@ export const createTask = async (data: CreateTaskRequest): Promise<Task> => {
  * @param data - Datos a actualizar
  */
 export const updateTask = async (id: string, data: UpdateTaskRequest): Promise<Task> => {
-  const response = await api.put<Task>(`/tasks/${id}`, data);
-  return response.data;
+  // Transformar a snake_case para la API
+  const apiData: any = {};
+  if (data.title) apiData.title = data.title;
+  if (data.description) apiData.description = data.description;
+  if (data.status) apiData.status = data.status;
+  if (data.priority) apiData.priority = data.priority;
+  if (data.dueDate) apiData.due_date = data.dueDate;
+  if (data.assignedTo) apiData.assigned_to = parseInt(data.assignedTo);
+
+  const response = await api.put(`/tasks/${id}`, apiData);
+  return transformTask(response.data);
 };
 
 /**
@@ -63,8 +98,8 @@ export const updateTaskStatus = async (
   id: string,
   status: UpdateTaskStatusRequest
 ): Promise<Task> => {
-  const response = await api.patch<Task>(`/tasks/${id}/status`, status);
-  return response.data;
+  const response = await api.patch(`/tasks/${id}/status`, status);
+  return transformTask(response.data);
 };
 
 /**

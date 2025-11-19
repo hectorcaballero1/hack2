@@ -34,13 +34,13 @@ export const TaskForm = ({
   onCancel,
   isLoading,
 }: TaskFormProps) => {
-  const [formData, setFormData] = useState<CreateTaskRequest>({
+  const [formData, setFormData] = useState({
     title: '',
     description: '',
     projectId: '',
     priority: 'MEDIUM',
     dueDate: format(new Date(), 'yyyy-MM-dd'),
-    assignedTo: 'none',
+    assignedTo: '',
   });
 
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -53,7 +53,7 @@ export const TaskForm = ({
         projectId: task.projectId,
         priority: task.priority,
         dueDate: task.dueDate,
-        assignedTo: task.assignedTo || 'none',
+        assignedTo: task.assignedTo || '',
       });
       setSelectedDate(new Date(task.dueDate));
     }
@@ -61,11 +61,25 @@ export const TaskForm = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const dataToSubmit = {
-      ...formData,
-      assignedTo: formData.assignedTo === 'none' ? undefined : formData.assignedTo
+    if (!formData.projectId) {
+      alert('Debes seleccionar un proyecto');
+      return;
+    }
+    const dataToSubmit: CreateTaskRequest = {
+      title: formData.title,
+      description: formData.description,
+      projectId: formData.projectId,
+      priority: formData.priority as TaskPriority,
+      dueDate: formData.dueDate,
     };
-    onSubmit(dataToSubmit as CreateTaskRequest);
+
+    // Solo agregar assignedTo si tiene valor
+    if (formData.assignedTo) {
+      dataToSubmit.assignedTo = formData.assignedTo;
+    }
+
+    console.log('Enviando tarea:', dataToSubmit);
+    onSubmit(dataToSubmit);
   };
 
   const handleDateSelect = (date: Date | undefined) => {
@@ -106,13 +120,16 @@ export const TaskForm = ({
           <Select
             value={formData.projectId}
             onValueChange={(value) => setFormData({ ...formData, projectId: value })}
-            required
           >
             <SelectTrigger>
-              <SelectValue placeholder="Selecciona un proyecto" />
+              {formData.projectId ? (
+                <SelectValue />
+              ) : (
+                <span className="text-muted-foreground">Selecciona un proyecto</span>
+              )}
             </SelectTrigger>
             <SelectContent>
-              {projects.map((project) => (
+              {projects.filter(p => p.id).map((project) => (
                 <SelectItem key={project.id} value={project.id}>
                   {project.name}
                 </SelectItem>
@@ -179,11 +196,14 @@ export const TaskForm = ({
             onValueChange={(value) => setFormData({ ...formData, assignedTo: value })}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Sin asignar" />
+              {formData.assignedTo ? (
+                <SelectValue />
+              ) : (
+                <span className="text-muted-foreground">Sin asignar</span>
+              )}
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="none">Sin asignar</SelectItem>
-              {teamMembers.map((member) => (
+              {teamMembers.filter(m => m.id).map((member) => (
                 <SelectItem key={member.id} value={member.id}>
                   {member.name}
                 </SelectItem>
