@@ -25,6 +25,14 @@ const Register = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validación de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      toast.error("El email no es válido");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -52,7 +60,7 @@ const Register = () => {
             </div>
             <div className="space-y-1">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" name="email" type="email" value={formData.email} onChange={handleChange} required placeholder="tu@email.com" />
+              <Input id="email" name="email" type="text" value={formData.email} onChange={handleChange} required placeholder="tu@email.com" />
             </div>
             <div className="space-y-1">
               <Label htmlFor="password">Contraseña</Label>
