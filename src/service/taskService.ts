@@ -39,7 +39,7 @@ export const getTasks = async (filters?: TaskFilters): Promise<TasksResponse> =>
   const response = await api.get(`/tasks?${params.toString()}`);
   return {
     tasks: response.data.tasks.map(transformTask),
-    totalPages: response.data.totalPages || 1,
+    totalPages: response.data.totalPages || response.data.total_pages || 1,
   };
 };
 
