@@ -48,10 +48,10 @@ const Tasks = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Filtros
-  const [selectedProject, setSelectedProject] = useState<string>('');
-  const [selectedStatus, setSelectedStatus] = useState<TaskStatus | ''>('');
-  const [selectedPriority, setSelectedPriority] = useState<TaskPriority | ''>('');
-  const [selectedAssignee, setSelectedAssignee] = useState<string>('');
+  const [selectedProject, setSelectedProject] = useState<string>('all');
+  const [selectedStatus, setSelectedStatus] = useState<string>('all');
+  const [selectedPriority, setSelectedPriority] = useState<string>('all');
+  const [selectedAssignee, setSelectedAssignee] = useState<string>('all');
 
   // Modal de crear/editar
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -98,10 +98,10 @@ const Tasks = () => {
         limit: 20,
       };
 
-      if (selectedProject) filters.projectId = selectedProject;
-      if (selectedStatus) filters.status = selectedStatus;
-      if (selectedPriority) filters.priority = selectedPriority;
-      if (selectedAssignee) filters.assignedTo = selectedAssignee;
+      if (selectedProject && selectedProject !== 'all') filters.projectId = selectedProject;
+      if (selectedStatus && selectedStatus !== 'all') filters.status = selectedStatus;
+      if (selectedPriority && selectedPriority !== 'all') filters.priority = selectedPriority;
+      if (selectedAssignee && selectedAssignee !== 'all') filters.assignedTo = selectedAssignee;
 
       const response = await getTasks(filters);
       setTasks(response.tasks);
@@ -176,14 +176,17 @@ const Tasks = () => {
   };
 
   const clearFilters = () => {
-    setSelectedProject('');
-    setSelectedStatus('');
-    setSelectedPriority('');
-    setSelectedAssignee('');
+    setSelectedProject('all');
+    setSelectedStatus('all');
+    setSelectedPriority('all');
+    setSelectedAssignee('all');
     setCurrentPage(1);
   };
 
-  const hasActiveFilters = selectedProject || selectedStatus || selectedPriority || selectedAssignee;
+  const hasActiveFilters = (selectedProject && selectedProject !== 'all') ||
+    (selectedStatus && selectedStatus !== 'all') ||
+    (selectedPriority && selectedPriority !== 'all') ||
+    (selectedAssignee && selectedAssignee !== 'all');
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -230,7 +233,7 @@ const Tasks = () => {
                 <SelectValue placeholder="Todos los proyectos" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos los proyectos</SelectItem>
+                <SelectItem value="all">Todos los proyectos</SelectItem>
                 {projects.map((project) => (
                   <SelectItem key={project.id} value={project.id}>
                     {project.name}
@@ -242,12 +245,12 @@ const Tasks = () => {
 
           <div className="space-y-2">
             <label className="text-sm font-medium">Estado</label>
-            <Select value={selectedStatus} onValueChange={(val) => setSelectedStatus(val as TaskStatus | '')}>
+            <Select value={selectedStatus} onValueChange={setSelectedStatus}>
               <SelectTrigger>
                 <SelectValue placeholder="Todos los estados" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos los estados</SelectItem>
+                <SelectItem value="all">Todos los estados</SelectItem>
                 <SelectItem value="TODO">Por Hacer</SelectItem>
                 <SelectItem value="IN_PROGRESS">En Progreso</SelectItem>
                 <SelectItem value="COMPLETED">Completada</SelectItem>
@@ -257,12 +260,12 @@ const Tasks = () => {
 
           <div className="space-y-2">
             <label className="text-sm font-medium">Prioridad</label>
-            <Select value={selectedPriority} onValueChange={(val) => setSelectedPriority(val as TaskPriority | '')}>
+            <Select value={selectedPriority} onValueChange={setSelectedPriority}>
               <SelectTrigger>
                 <SelectValue placeholder="Todas las prioridades" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todas las prioridades</SelectItem>
+                <SelectItem value="all">Todas las prioridades</SelectItem>
                 <SelectItem value="LOW">Baja</SelectItem>
                 <SelectItem value="MEDIUM">Media</SelectItem>
                 <SelectItem value="HIGH">Alta</SelectItem>
@@ -278,7 +281,7 @@ const Tasks = () => {
                 <SelectValue placeholder="Todos los usuarios" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos los usuarios</SelectItem>
+                <SelectItem value="all">Todos los usuarios</SelectItem>
                 {teamMembers.map((member) => (
                   <SelectItem key={member.id} value={member.id}>
                     {member.name}

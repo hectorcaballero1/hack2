@@ -1,35 +1,39 @@
-import api from "./api";
-import { Project, ProjectFormData } from "../types";
+import { api } from './api';
+import type {
+  Project,
+  ProjectsResponse,
+  CreateProjectRequest,
+  UpdateProjectRequest,
+  ProjectFilters
+} from '../types';
 
 export const projectService = {
-  getProjects: async (
-    page: number = 1,
-    limit: number = 10,
-    search: string = ""
-  ) => {
-    const response = await api.get(
-      `/projects?page=${page}&limit=${limit}&search=${search}`
-    );
+  async getProjects(filters?: ProjectFilters): Promise<ProjectsResponse> {
+    const params = new URLSearchParams();
+    if (filters?.page) params.append('page', filters.page.toString());
+    if (filters?.limit) params.append('limit', filters.limit.toString());
+    if (filters?.search) params.append('search', filters.search);
+
+    const response = await api.get<ProjectsResponse>(`/projects?${params.toString()}`);
     return response.data;
   },
 
-  getProject: async (id: string) => {
-    const response = await api.get(`/projects/${id}`);
+  async getProject(id: string): Promise<Project> {
+    const response = await api.get<Project>(`/projects/${id}`);
     return response.data;
   },
 
-  createProject: async (data: ProjectFormData) => {
-    const response = await api.post("/projects", data);
+  async createProject(data: CreateProjectRequest): Promise<Project> {
+    const response = await api.post<Project>('/projects', data);
     return response.data;
   },
 
-  updateProject: async (id: string, data: Partial<ProjectFormData>) => {
-    const response = await api.put(`/projects/${id}`, data);
+  async updateProject(id: string, data: UpdateProjectRequest): Promise<Project> {
+    const response = await api.put<Project>(`/projects/${id}`, data);
     return response.data;
   },
 
-  deleteProject: async (id: string) => {
-    const response = await api.delete(`/projects/${id}`);
-    return response.data;
+  async deleteProject(id: string): Promise<void> {
+    await api.delete(`/projects/${id}`);
   },
 };

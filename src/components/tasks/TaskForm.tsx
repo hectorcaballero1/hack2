@@ -40,7 +40,7 @@ export const TaskForm = ({
     projectId: '',
     priority: 'MEDIUM',
     dueDate: format(new Date(), 'yyyy-MM-dd'),
-    assignedTo: '',
+    assignedTo: 'none',
   });
 
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -53,7 +53,7 @@ export const TaskForm = ({
         projectId: task.projectId,
         priority: task.priority,
         dueDate: task.dueDate,
-        assignedTo: task.assignedTo || '',
+        assignedTo: task.assignedTo || 'none',
       });
       setSelectedDate(new Date(task.dueDate));
     }
@@ -61,7 +61,11 @@ export const TaskForm = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    const dataToSubmit = {
+      ...formData,
+      assignedTo: formData.assignedTo === 'none' ? undefined : formData.assignedTo
+    };
+    onSubmit(dataToSubmit as CreateTaskRequest);
   };
 
   const handleDateSelect = (date: Date | undefined) => {
@@ -178,7 +182,7 @@ export const TaskForm = ({
               <SelectValue placeholder="Sin asignar" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Sin asignar</SelectItem>
+              <SelectItem value="none">Sin asignar</SelectItem>
               {teamMembers.map((member) => (
                 <SelectItem key={member.id} value={member.id}>
                   {member.name}
