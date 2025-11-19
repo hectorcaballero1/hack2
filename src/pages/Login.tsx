@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { handleApiError } from "../lib/apiError";
 import { useAuth } from "../context/AuthContext";
+import { toast } from "sonner";
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,19 +12,17 @@ const Login = () => {
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMessage("");
     setLoading(true);
 
     try {
       await login(email, password);
       // La redirección ahora es manejada por AuthContext
     } catch (error) {
-      setErrorMessage(handleApiError(error));
+      toast.error(handleApiError(error));
     } finally {
       setLoading(false);
     }
@@ -37,12 +36,6 @@ const Login = () => {
         </CardHeader>
 
         <CardContent>
-          {errorMessage && (
-            <p className="text-red-500 text-sm text-center mb-3">
-              {errorMessage}
-            </p>
-          )}
-
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1">
               <Label>Email</Label>
