@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { handleApiError } from "../lib/apiError";
+import { toast } from "sonner";
 import type { RegisterRequest } from "../types";
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -15,7 +16,6 @@ const Register = () => {
     password: "",
     name: "",
   });
-  const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -25,14 +25,13 @@ const Register = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMessage("");
     setLoading(true);
 
     try {
       await register(formData);
-      // La redirección a /login es manejada por AuthContext
+      toast.success("Cuenta creada exitosamente");
     } catch (error) {
-      setErrorMessage(handleApiError(error));
+      toast.error(handleApiError(error));
     } finally {
       setLoading(false);
     }
@@ -46,12 +45,6 @@ const Register = () => {
         </CardHeader>
 
         <CardContent>
-          {errorMessage && (
-            <p className="text-red-500 text-sm text-center mb-3">
-              {errorMessage}
-            </p>
-          )}
-
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1">
               <Label htmlFor="name">Nombre</Label>
