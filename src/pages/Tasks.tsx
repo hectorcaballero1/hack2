@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { Task, TaskStatus, TaskPriority, Project, TeamMember, CreateTaskRequest } from '@/types';
+import type { Task, TaskStatus, Project, TeamMember, CreateTaskRequest } from '@/types';
 import {
   getTasks,
   createTask,
